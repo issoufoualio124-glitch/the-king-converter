@@ -1,0 +1,191 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The King Converter</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 20px;
+  background: #081426;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+main {
+  max-width: 500px;
+  margin: auto;
+  background: #12243e;
+  padding: 22px;
+  border-radius: 18px;
+  border: 1px solid #244b78;
+}
+h1 { color: #55b8ff; text-align: center; }
+p { color: #b7cce5; text-align: center; }
+label { display: block; margin: 15px 0 7px; }
+input, select, button {
+  width: 100%;
+  padding: 13px;
+  border-radius: 9px;
+  font-size: 16px;
+}
+input, select {
+  color: white;
+  background: #09182b;
+  border: 1px solid #31567f;
+}
+button {
+  margin-top: 14px;
+  border: 0;
+  background: #1688f8;
+  color: white;
+  font-weight: bold;
+}
+#resultat {
+  margin-top: 20px;
+  padding: 15px;
+  border-radius: 10px;
+  background: #09182b;
+  overflow-wrap: anywhere;
+  line-height: 1.8;
+}
+</style>
+</head>
+<body>
+<main>
+<h1>THE KING CONVERTER</h1>
+<p>Convertis tes nombres et tes lettres</p>
+
+<label for="mode">Type de conversion</label>
+<select id="mode">
+  <option value="bases">Bases numériques</option>
+  <option value="alphabet">Lettres vers nombres</option>
+  <option value="decode">Nombres vers lettres</option>
+</select>
+
+<label for="source">Base de départ</label>
+<select id="base">
+  <option value="2">Binaire (2)</option>
+  <option value="8">Octale (8)</option>
+  <option value="10" selected>Décimale (10)</option>
+  <option value="16">Hexadécimale (16)</option>
+</select>
+
+<label for="entree">Valeur à convertir</label>
+<input id="entree" placeholder="Ex. 26 ou THE KING">
+
+<button onclick="convertir()">CONVERTIR</button>
+<button onclick="effacer()" style="background:#31506f">
+EFFACER
+</button>
+
+<div id="resultat">Le résultat apparaîtra ici.</div>
+</main>
+<script>
+
+function convertir() {
+  const mode = document.getElementById('mode').value;
+  const entree = document.getElementById('entree').value.trim();
+  const base = Number(document.getElementById('base').value);
+  const resultat = document.getElementById('resultat');
+
+  resultat.style.whiteSpace = 'pre-line';
+
+  try {
+    if (!entree) throw Error("Entre une valeur.");
+
+    // Lettres vers nombres : A=1, ..., Z=26
+    if (mode === 'alphabet') {
+      if (!/^[a-zA-Z ]+$/.test(entree))
+        throw Error("Utilise uniquement des lettres et des espaces.");
+
+      resultat.textContent = entree.toUpperCase()
+        .split(' ')
+        .map(mot => [...mot].map(c => c.charCodeAt(0) - 64).join('-'))
+        .join(' / ');
+      return;
+    }
+
+    // Nombres vers lettres
+    if (mode === 'decode') {
+      const groupes = entree.split('/');
+      const texte = groupes.map(g => {
+        const nombres = g.trim().split(/[\s,-]+/).filter(Boolean);
+
+        if (!nombres.length) throw Error("Séquence alphabétique vide.");
+
+        return nombres.map(n => {
+          if (!/^\d+$/.test(n))
+            throw Error("Chaque valeur doit être un entier.");
+
+          const v = Number(n);
+          if (v < 1 || v > 26)
+            throw Error("Les nombres doivent être compris entre 1 et 26.");
+
+          return String.fromCharCode(64 + v);
+        }).join('');
+      }).join(' ');
+
+      resultat.textContent = texte;
+      return;
+    }
+
+    // Conversion exacte entre les quatre bases
+    let s = entree.toUpperCase();
+    let signe = 1n;
+
+    if (s.startsWith('-')) {
+      signe = -1n;
+      s = s.slice(1);
+    } else if (s.startsWith('+')) {
+      s = s.slice(1);
+    }
+
+    if (!s) throw Error("Nombre invalide.");
+
+    const prefixes = {2: '0B', 8: '0O', 16: '0X'};
+    if (prefixes[base] && s.startsWith(prefixes[base]))
+      s = s.slice(2);
+
+    const chiffres = '0123456789ABCDEF';
+    let valeur = 0n;
+
+    if (!s) throw Error("Nombre invalide.");
+
+    for (const c of s) {
+      const chiffre = chiffres.indexOf(c);
+
+      if (chiffre < 0 || chiffre >= base)
+        throw Error("Chiffre invalide pour la base " + base + ".");
+
+      valeur = valeur * BigInt(base) + BigInt(chiffre);
+    }
+
+    valeur *= signe;
+
+    resultat.textContent =
+      'Binaire : ' + valeur.toString(2) + '\n' +
+      'Octale : ' + valeur.toString(8) + '\n' +
+      'Décimale : ' + valeur.toString(10) + '\n' +
+      'Hexadécimale : ' + valeur.toString(16).toUpperCase();
+
+  } catch (e) {
+    resultat.textContent = 'Erreur : ' + e.message;
+  }
+}
+
+function effacer() {
+  document.getElementById('entree').value = '';
+  document.getElementById('resultat').textContent =
+    'Le résultat apparaîtra ici.';
+}
+
+ 
+
+   
+</script>
+</body>
+</html>
+
