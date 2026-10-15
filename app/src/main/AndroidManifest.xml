@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
         android:theme="@android:style/Theme.Material.NoActionBar"
-        android:label="The King Converter"
+        android:label="Convertisseur numérique" android:icon="@drawable/ic_launcher" android:roundIcon="@drawable/ic_launcher"
         android:usesCleartextTraffic="false">
         <activity
             android:name=".MainActivity"
